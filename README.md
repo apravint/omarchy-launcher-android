@@ -1,70 +1,53 @@
-# 📱 Omarchy Launcher for Android (`omarchy-launcher-android`)
+# 📱 Omarchy Multi-OS Android Launcher (`v2.0.0`)
 
-> **Minimalist, Glassmorphic Tiling Home Screen Launcher & AI Assistant Suite for Android**
+[![GitHub Release](https://img.shields.io/github/v/release/apravint/omarchy-launcher-android?color=cyan&label=Latest%20Release)](https://github.com/apravint/omarchy-launcher-android/releases/tag/v2.0.0)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Android Min SDK](https://img.shields.io/badge/Android-7.0%2B%20(API%2024)-brightgreen)](https://developer.android.com)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Android](https://img.shields.io/badge/platform-Android%208.0%2B-green.svg)]()
-[![Theme](https://img.shields.io/badge/themes-Omarchy%2022-purple.svg)]()
+**Omarchy Multi-OS Launcher** is a top-grade, high-performance home screen replacement for Android smartphones and tablets. It combines three iconic desktop operating system experiences into one fluid, glassmorphic Android launcher interface.
 
-`omarchy-launcher-android` is an open-source Android Home Screen launcher inspired by **Omarchy Linux**, Nothing OS, and Niagara Launcher — featuring glassmorphic app cards, quick AI command prompt integration, fast Termux launching, and live theme switching.
-
-<p align="center">
-  <img src="assets/preview.jpg" alt="Omarchy Launcher Android Preview" width="380" />
-</p>
+Developed by **Ayyappa Pravin** (<apravint@gmail.com>).
 
 ---
 
-## ✨ Features
+## ⚡ Key Features
 
-- ⚡ **Built-in AI Assistant Bar**: Enter quick prompts directly on your Android home screen to execute queries via local AI or Termux daemons.
-- 🔮 **Glassmorphic App Cards & Tiling Grid**: Categorized app launcher (Dev & AI, System, Media) with fast fuzzy search.
-- 🎨 **Omarchy 22 Theme Palette System**: Switch live between Tokyo Night, Catppuccin Mocha, Nord, Cyberpunk, and Gruvbox.
-- 📱 **Native System Home Launcher Intent**: Sets as default Android system launcher (`CATEGORY_HOME`).
+- 🪟 **Windows 11 Mode**: Centered Taskbar, Windows 11 Start Menu with pinned app grid, search bar, and power options (`Power Off`, `Restart`).
+-  **macOS Sonoma Mode**: Top macOS Menu Bar displaying Apple logo (``), status clock, battery telemetry, and a floating glassmorphic bottom Dock.
+- ⚡ **Omarchy Cyberpunk Mode**: Ultra-sleek glassmorphic cyberpunk theme with dynamic glow effects.
+- 📱 **Native App Drawer Engine**: Queries system `PackageManager` to retrieve all installed Android apps with search and category filtering.
+- 📳 **Haptic Feedback Bridge**: Tactile vibration feedback on touch interactions.
+- 🛡️ **4-Byte ZipAligned & V1/V2/V3 Signed**: Fully optimized for Motorola Edge, Google Pixel, Samsung Galaxy, Xiaomi, and Android 14/15 devices.
 
 ---
 
-## 🚀 Building & Testing
+## 📦 Direct Download & Installation
 
-### 1. Web / Browser Test
-Open `web/index.html` in any browser to test the interactive launcher interface.
+1. Download the latest compiled APK: 📦 [OmarchyLauncher.apk](https://github.com/apravint/omarchy-launcher-android/releases/download/v2.0.0/OmarchyLauncher.apk)
+2. Open the downloaded file on your Android device.
+3. Allow **"Install from unknown sources"** if prompted.
+4. Set **Omarchy Launcher** as your default home app!
 
-### 2. Automated GitHub Actions APK Build
-This repository includes a pre-configured GitHub Actions CI/CD workflow (`.github/workflows/build-apk.yml`).
+---
 
-- **Automatic Build & Release**: Push a version tag (e.g. `git tag v1.0.0 && git push origin v1.0.0`) to automatically trigger APK compilation and publish a GitHub Release with the downloadable `.apk` file attached.
-- **Manual Trigger**: Go to the **Actions** tab on GitHub -> Select **Build & Release Omarchy Android Launcher APK** -> Click **Run workflow**.
+## 🛠️ Architecture & Build Instructions
 
-### 3. Local Android APK Build
-Build using Gradle wrapper or Android Studio:
+Built with Android Java, native WebView bridge, and GitHub Actions automated CI/CD.
 
 ```bash
-cd android
-./gradlew assembleRelease
-```
-The compiled APK will be located at `android/app/build/outputs/apk/release/app-release.apk`.
+# Clone the repository
+git clone https://github.com/apravint/omarchy-launcher-android.git
+cd omarchy-launcher-android
 
----
-
-## 🌲 Repository Structure
-
-```text
-omarchy-launcher-android/
-├── android/
-│   └── app/src/main/
-│       ├── AndroidManifest.xml   # System HOME launcher intent
-│       └── java/.../MainActivity.kt
-├── web/
-│   ├── index.html                # Launcher Glassmorphic UI
-│   ├── styles.css                # Mobile design system
-│   └── app.js                    # App grid & AI prompt logic
-├── assets/
-│   └── preview.jpg
-├── README.md
-└── LICENSE
+# Build using AAPT and D8 toolchain
+$ANDROID_HOME/build-tools/34.0.0/aapt package -f -m \
+  -J build/gen \
+  -M android/app/src/main/AndroidManifest.xml \
+  -S android/app/src/main/res \
+  -I $ANDROID_HOME/platforms/android-34/android.jar
 ```
 
 ---
 
 ## 📄 License
-
-Distributed under the MIT License. Built by **Pravin Tamilan ([@apravint](https://github.com/apravint))**.
+Licensed under the [MIT License](LICENSE).
