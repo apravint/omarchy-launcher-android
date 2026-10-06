@@ -1,4 +1,4 @@
-// Omarchy Android Launcher Client Logic with Native Android Bridge
+// Omarchy Android Launcher Client Logic with Native Android Bridge & Top-Tier Features
 let INSTALLED_APPS = [];
 let CURRENT_APP_SELECTED = null;
 
@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadDeviceInfo();
   loadSavedTheme();
+  loadSavedIconShape();
   loadSavedGridDensity();
   loadRealInstalledApps();
 
@@ -50,14 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // AI Prompt & App Search Bar
+  // AI Prompt & App Search Bar with Web/Store Fallback Shortcuts
   const aiInput = document.getElementById('ai-prompt-input');
   const clearBtn = document.getElementById('search-clear');
+  const searchShortcuts = document.getElementById('search-shortcuts');
+  const btnWeb = document.getElementById('btn-web-search');
+  const btnStore = document.getElementById('btn-store-search');
 
   if (aiInput) {
     aiInput.addEventListener('input', () => {
       const query = aiInput.value.toLowerCase().trim();
       clearBtn.style.display = query ? 'block' : 'none';
+      searchShortcuts.style.display = query ? 'flex' : 'none';
+
       if (!query) {
         renderAppGrid(INSTALLED_APPS);
       } else {
@@ -77,18 +83,81 @@ document.addEventListener('DOMContentLoaded', () => {
           if (match) {
             triggerAppLaunch(match);
           } else {
-            alert(`⚡ Omarchy AI Prompt Executed:\n"${query}"`);
+            searchWeb(query);
           }
-          aiInput.value = '';
-          clearBtn.style.display = 'none';
-          renderAppGrid(INSTALLED_APPS);
+          clearSearch();
         }
       }
     });
   }
 
+  if (btnWeb) {
+    btnWeb.onclick = () => {
+      const query = aiInput.value.trim();
+      if (query) searchWeb(query);
+    };
+  }
+
+  if (btnStore) {
+    btnStore.onclick = () => {
+      const query = aiInput.value.trim();
+      if (query) searchPlayStore(query);
+    };
+  }
+
   renderThemeGrid();
+  buildAlphabetIndexer();
 });
+
+function searchWeb(query) {
+  const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+  if (window.AndroidLauncher && window.AndroidLauncher.launchApp) {
+    window.AndroidLauncher.launchApp('com.android.chrome');
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
+function searchPlayStore(query) {
+  const url = `https://play.google.com/store/search?q=${encodeURIComponent(query)}&c=apps`;
+  if (window.AndroidLauncher && window.AndroidLauncher.launchApp) {
+    window.AndroidLauncher.launchApp('com.android.vending');
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
+function buildAlphabetIndexer() {
+  const indexer = document.getElementById('alphabet-indexer');
+  if (!indexer) return;
+
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+  indexer.innerHTML = '';
+
+  alphabet.forEach(letter => {
+    const span = document.createElement('span');
+    span.className = 'fast-letter';
+    span.innerText = letter;
+    span.onclick = () => scrollToLetter(letter);
+    indexer.appendChild(span);
+  });
+}
+
+function scrollToLetter(letter) {
+  const grid = document.getElementById('app-grid-container');
+  const items = grid.querySelectorAll('.app-item');
+  
+  for (let item of items) {
+    const name = item.dataset.appName || '';
+    if (letter === '#' && !isNaN(name.charAt(0))) {
+      item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    } else if (name.toUpperCase().startsWith(letter)) {
+      item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+  }
+}
 
 function setDefaultHomeLauncher() {
   if (window.AndroidLauncher && window.AndroidLauncher.setAsDefaultHome) {
@@ -116,6 +185,26 @@ function setGridDensity(cols) {
 function loadSavedGridDensity() {
   const savedCols = localStorage.getItem('omarchy_grid_cols') || 5;
   setGridDensity(savedCols);
+}
+
+function setIconShape(shape) {
+  document.body.classList.remove('shape-squircle', 'shape-circle', 'shape-rounded', 'shape-teardrop');
+  document.body.classList.add(`shape-${shape}`);
+  
+  document.querySelectorAll('.shape-btn').forEach(btn => {
+    if (btn.dataset.shape === shape) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  localStorage.setItem('omarchy_icon_shape', shape);
+}
+
+function loadSavedIconShape() {
+  const saved = localStorage.getItem('omarchy_icon_shape') || 'squircle';
+  setIconShape(saved);
 }
 
 function loadDeviceInfo() {
@@ -206,6 +295,7 @@ function renderAppGrid(appList) {
   appList.forEach(app => {
     const item = document.createElement('div');
     item.className = 'app-item';
+    item.dataset.appName = app.name;
 
     let pressTimer;
 
@@ -260,8 +350,11 @@ function updateClock() {
 function clearSearch() {
   const aiInput = document.getElementById('ai-prompt-input');
   const clearBtn = document.getElementById('search-clear');
+  const searchShortcuts = document.getElementById('search-shortcuts');
+  
   aiInput.value = '';
   clearBtn.style.display = 'none';
+  searchShortcuts.style.display = 'none';
   renderAppGrid(INSTALLED_APPS);
 }
 
@@ -313,14 +406,17 @@ function renderThemeGrid() {
 }
 
 function applyTheme(themeId) {
-  document.body.className = `theme-${themeId}`;
+  document.body.classList.remove(
+    'theme-tokyonight', 'theme-catppuccin', 'theme-nord', 
+    'theme-cyberpunk', 'theme-dracula', 'theme-sunset', 'theme-oled'
+  );
+  document.body.classList.add(`theme-${themeId}`);
   localStorage.setItem('omarchy_theme', themeId);
-  closeThemeModal();
 }
 
 function loadSavedTheme() {
   const saved = localStorage.getItem('omarchy_theme') || 'tokyonight';
-  document.body.className = `theme-${saved}`;
+  applyTheme(saved);
 }
 
 function openAppModal(app) {
