@@ -1,18 +1,17 @@
-// Omarchy Android Launcher Client Logic
+// Omarchy Android Launcher Client Logic with Native Android Bridge
 
-const APPS = [
-  { id: 'termux', name: 'Termux', icon: '⚡', category: 'Dev & AI', action: 'launchTermux' },
-  { id: 'openclaw', name: 'OpenClaw AI', icon: '🦅', category: 'Dev & AI', action: 'launchOpenClaw' },
-  { id: 'devpulse', name: 'AI-DevPulse', icon: '🛡️', category: 'Dev & AI', action: 'launchDevPulse' },
-  { id: 'tamilai', name: 'Tamil AI', icon: '🌺', category: 'Dev & AI', action: 'launchTamilAI' },
-  { id: 'chrome', name: 'Browser', icon: '🌐', category: 'System', action: 'openBrowser' },
-  { id: 'github', name: 'GitHub', icon: '🐙', category: 'Dev & AI', action: 'openGitHub' },
-  { id: 'camera', name: 'Camera', icon: '📷', category: 'System', action: 'openCamera' },
-  { id: 'gallery', name: 'Photos', icon: '🖼️', category: 'Media', action: 'openGallery' },
-  { id: 'music', name: 'Music', icon: '🎵', category: 'Media', action: 'openMusic' },
-  { id: 'settings', name: 'Settings', icon: '⚙️', category: 'System', action: 'openSettings' },
-  { id: 'telegram', name: 'Messages', icon: '💬', category: 'Media', action: 'openMessages' },
-  { id: 'themes', name: 'Omarchy Themes', icon: '🎨', category: 'System', action: 'openThemeSwitcher' }
+let INSTALLED_APPS = [];
+
+const MOCK_FALLBACK_APPS = [
+  { id: 'termux', name: 'Termux', icon: '⚡', category: 'Dev & AI', packageName: 'com.termux' },
+  { id: 'openclaw', name: 'OpenClaw AI', icon: '🦅', category: 'Dev & AI' },
+  { id: 'devpulse', name: 'AI-DevPulse', icon: '🛡️', category: 'Dev & AI' },
+  { id: 'tamilai', name: 'Tamil AI', icon: '🌺', category: 'Dev & AI' },
+  { id: 'chrome', name: 'Browser', icon: '🌐', category: 'System', packageName: 'com.android.chrome' },
+  { id: 'github', name: 'GitHub', icon: '🐙', category: 'Dev & AI', packageName: 'com.github.android' },
+  { id: 'camera', name: 'Camera', icon: '📷', category: 'System' },
+  { id: 'gallery', name: 'Photos', icon: '🖼️', category: 'Media' },
+  { id: 'settings', name: 'Settings', icon: '⚙️', category: 'System', packageName: 'com.android.settings' }
 ];
 
 const THEMES = {
@@ -26,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateClock();
   setInterval(updateClock, 1000);
 
-  renderAppGrid(APPS);
+  loadRealInstalledApps();
 
   // Category Filter Pills
   document.querySelectorAll('.pill').forEach(pill => {
@@ -36,28 +35,65 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const cat = pill.dataset.category;
       if (cat === 'All') {
-        renderAppGrid(APPS);
+        renderAppGrid(INSTALLED_APPS);
       } else {
-        const filtered = APPS.filter(a => a.category === cat);
+        const filtered = INSTALLED_APPS.filter(a => a.category === cat);
         renderAppGrid(filtered);
       }
     });
   });
 
-  // AI Prompt Bar listener
+  // AI Prompt & App Search Bar listener
   const aiInput = document.getElementById('ai-prompt-input');
   if (aiInput) {
+    aiInput.addEventListener('input', (e) => {
+      const query = aiInput.value.toLowerCase().trim();
+      if (!query) {
+        renderAppGrid(INSTALLED_APPS);
+      } else {
+        const filtered = INSTALLED_APPS.filter(a => a.name.toLowerCase().includes(query));
+        renderAppGrid(filtered);
+      }
+    });
+
     aiInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         const query = aiInput.value.trim();
         if (query) {
-          alert(`⚡ Omarchy AI Prompt Sent:\n"${query}"\nExecuting via local AI engine...`);
+          alert(`⚡ Omarchy AI Prompt Executed:\n"${query}"`);
           aiInput.value = '';
+          renderAppGrid(INSTALLED_APPS);
         }
       }
     });
   }
 });
+
+function loadRealInstalledApps() {
+  if (window.AndroidLauncher && window.AndroidLauncher.getInstalledApps) {
+    try {
+      const jsonStr = window.AndroidLauncher.getInstalledApps();
+      const rawList = JSON.parse(jsonStr);
+
+      if (rawList && rawList.length > 0) {
+        INSTALLED_APPS = rawList.map(item => ({
+          name: item.name,
+          packageName: item.packageName,
+          iconUrl: item.icon,
+          category: 'All'
+        }));
+        renderAppGrid(INSTALLED_APPS);
+        return;
+      }
+    } catch (err) {
+      console.error("Native apps load error:", err);
+    }
+  }
+
+  // Fallback to mock preview apps if web preview
+  INSTALLED_APPS = MOCK_FALLBACK_APPS;
+  renderAppGrid(INSTALLED_APPS);
+}
 
 function updateClock() {
   const now = new Date();
@@ -82,8 +118,12 @@ function renderAppGrid(appList) {
     item.className = 'app-item';
     item.onclick = () => triggerAppAction(app);
 
+    const iconHtml = app.iconUrl 
+      ? `<img src="${app.iconUrl}" style="width:40px; height:40px; object-fit:contain;" />`
+      : app.icon || '📱';
+
     item.innerHTML = `
-      <div class="app-icon">${app.icon}</div>
+      <div class="app-icon">${iconHtml}</div>
       <div class="app-label">${app.name}</div>
     `;
     grid.appendChild(item);
@@ -91,7 +131,12 @@ function renderAppGrid(appList) {
 }
 
 function triggerAppAction(app) {
-  if (app.id === 'themes') {
+  if (app.packageName && window.AndroidLauncher && window.AndroidLauncher.launchApp) {
+    const launched = window.AndroidLauncher.launchApp(app.packageName);
+    if (!launched) {
+      alert(`Unable to launch ${app.name}`);
+    }
+  } else if (app.id === 'themes') {
     switchThemeModal();
   } else {
     alert(`🚀 Launching ${app.name}...`);
