@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-apk:
-    name: Build Android APK
+    name: Build Native Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -26,21 +26,55 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Package Mobile Launcher Bundle & Web App
+      - name: Compile Native OmarchyLauncher.apk
         run: |
-          mkdir -p android/app/src/main/assets/web
-          cp -r web/* android/app/src/main/assets/web/
-          zip -r OmarchyLauncher-v1.0.0-AppBundle.zip web/ android/
-          echo "✔ Web assets and native Android container packaged cleanly"
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/34.0.0"
+          PLATFORM="$ANDROID_HOME/platforms/android-34/android.jar"
+          
+          mkdir -p build/gen build/obj build/apk_assets/assets/web
+          cp -r web/* build/apk_assets/assets/web/
+          
+          # 1. AAPT Generate R.java
+          $BUILD_TOOLS/aapt package -f -m \
+            -J build/gen \
+            -M android/app/src/main/AndroidManifest.xml \
+            -S android/app/src/main/res \
+            -I $PLATFORM
+            
+          # 2. Javac Compile Java Classes
+          javac -d build/obj \
+            -classpath $PLATFORM \
+            build/gen/com/apravint/omarchylauncher/R.java \
+            android/app/src/main/java/com/apravint/omarchylauncher/MainActivity.java
+            
+          # 3. D8 Dexing
+          $BUILD_TOOLS/d8 --output build/ \
+            build/obj/com/apravint/omarchylauncher/*.class
+            
+          # 4. Package Unsigned APK
+          $BUILD_TOOLS/aapt package -f \
+            -M android/app/src/main/AndroidManifest.xml \
+            -S android/app/src/main/res \
+            -I $PLATFORM \
+            -F OmarchyLauncher-unsigned.apk build/apk_assets
+            
+          # 5. Add classes.dex to APK
+          cd build
+          $BUILD_TOOLS/aapt add ../OmarchyLauncher-unsigned.apk classes.dex
+          cd ..
+          
+          # 6. Generate Keystore & Sign APK
+          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          $BUILD_TOOLS/apksigner sign --ks debug.keystore --ks-pass pass:android --out OmarchyLauncher.apk OmarchyLauncher-unsigned.apk
+          
+          echo "✔ Successfully compiled and signed OmarchyLauncher.apk!"
+          ls -lh OmarchyLauncher.apk
 
-      - name: Upload Launcher Build Artifact
+      - name: Upload APK Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OmarchyLauncher-AppBundle
-          path: |
-            *.zip
-            android/app/build/outputs/apk/**/*.apk
-          if-no-files-found: ignore
+          name: OmarchyLauncher-APK
+          path: OmarchyLauncher.apk
 
       - name: Create GitHub Release with APK Asset
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
@@ -56,9 +90,8 @@ jobs:
             - 🎨 **Omarchy 22 Theme Palette System**: Switch live between Tokyo Night, Catppuccin, Nord, Cyberpunk.
             - 📱 **Native System Home Launcher Intent**: Set as default Android home launcher.
 
-            Download the attached `.apk` file below to install directly on your Android device!
+            Download the attached **`OmarchyLauncher.apk`** file below to install directly on your Android device!
           files: |
-            android/app/build/outputs/apk/**/*.apk
-            *.zip
+            OmarchyLauncher.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
