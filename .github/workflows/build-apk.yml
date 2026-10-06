@@ -37,12 +37,12 @@ jobs:
 
       - name: Build Android Release APK
         run: |
-          cd android || true
-          if [ -f "gradlew" ]; then
+          if [ -f "android/gradlew" ]; then
+            cd android
             ./gradlew assembleRelease --no-daemon
           else
             echo "Packaging Web Launcher Standalone PWA Bundle..."
-            zip -r OmarchyLauncher-WebBundle.zip web/*
+            zip -r OmarchyLauncher-WebBundle.zip web/
           fi
 
       - name: Upload APK Build Artifact
@@ -52,6 +52,7 @@ jobs:
           path: |
             android/app/build/outputs/apk/release/*.apk
             *.zip
+          if-no-files-found: ignore
 
       - name: Create GitHub Release with APK Asset
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
