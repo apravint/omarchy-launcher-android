@@ -48,7 +48,6 @@ public class MainActivity extends Activity {
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setDatabaseEnabled(true);
-        settings.setAppCacheEnabled(true);
         settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
 
         webView.addJavascriptInterface(new WebAppInterface(), "AndroidLauncher");
