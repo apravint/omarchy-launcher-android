@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Omarchy Android Launcher</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Clock & Date Widget -->
+  <div class="clock-widget">
+    <div class="time-display" id="time-val">14:38</div>
+    <div class="date-display" id="date-val">Thursday, Oct 26</div>
+  </div>
+
+  <!-- AI Command & Search Bar -->
+  <div class="ai-bar-card">
+    <div class="ai-icon">⚡</div>
+    <input type="text" class="ai-input" id="ai-prompt-input" placeholder="Ask AI / Run Termux command..." autocomplete="off">
+  </div>
+
+  <!-- Main Launcher Content Area -->
+  <div style="flex: 1; overflow-y: auto;">
+    
+    <!-- Category Filter Pills -->
+    <div class="category-pills">
+      <div class="pill active" data-category="All">All Apps</div>
+      <div class="pill" data-category="Dev & AI">Dev & AI</div>
+      <div class="pill" data-category="System">System</div>
+      <div class="pill" data-category="Media">Media</div>
+    </div>
+
+    <!-- App Grid -->
+    <div class="app-grid" id="app-grid-container">
+      <!-- Dynamically populated by app.js -->
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation Dock -->
+  <div class="bottom-bar">
+    <button class="bar-btn active">🏠</button>
+    <button class="bar-btn" onclick="switchThemeModal()">🎨</button>
+    <button class="bar-btn" onclick="alert('⚡ Termux AI Daemon Active')">⚡</button>
+    <button class="bar-btn" onclick="alert('⚙️ Omarchy Launcher Settings')">⚙️</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
