@@ -28,7 +28,13 @@
 ### 1. Web / Browser Test
 Open `web/index.html` in any browser to test the interactive launcher interface.
 
-### 2. Native Android APK Build
+### 2. Automated GitHub Actions APK Build
+This repository includes a pre-configured GitHub Actions CI/CD workflow (`.github/workflows/build-apk.yml`).
+
+- **Automatic Build & Release**: Push a version tag (e.g. `git tag v1.0.0 && git push origin v1.0.0`) to automatically trigger APK compilation and publish a GitHub Release with the downloadable `.apk` file attached.
+- **Manual Trigger**: Go to the **Actions** tab on GitHub -> Select **Build & Release Omarchy Android Launcher APK** -> Click **Run workflow**.
+
+### 3. Local Android APK Build
 Build using Gradle wrapper or Android Studio:
 
 ```bash

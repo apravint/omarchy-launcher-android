@@ -1,0 +1,78 @@
+name: Build & Release Omarchy Android Launcher APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build Web Assets & Package Web Launcher
+        run: |
+          mkdir -p android/app/src/main/assets/web
+          cp -r web/* android/app/src/main/assets/web/
+          echo "✔ Web assets packaged into Android WebView asset folder"
+
+      - name: Grant Execute Permission for Gradle
+        run: |
+          if [ -f "android/gradlew" ]; then
+            chmod +x android/gradlew
+          fi
+
+      - name: Build Android Release APK
+        run: |
+          cd android || true
+          if [ -f "gradlew" ]; then
+            ./gradlew assembleRelease --no-daemon
+          else
+            echo "Packaging Web Launcher Standalone PWA Bundle..."
+            zip -r OmarchyLauncher-WebBundle.zip web/*
+          fi
+
+      - name: Upload APK Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OmarchyLauncher-APK
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            *.zip
+
+      - name: Create GitHub Release with APK Asset
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Omarchy Launcher v1.0.0"
+          body: |
+            ## 📱 Omarchy Launcher for Android v1.0.0 Release
+            
+            ### ✨ Features Included:
+            - ⚡ **Built-in AI Assistant Bar**: Quick AI prompts directly on home screen.
+            - 🔮 **Glassmorphic App Cards & Grid**: Categorized app launcher (Dev & AI, System, Media).
+            - 🎨 **Omarchy 22 Theme Palette System**: Switch live between Tokyo Night, Catppuccin, Nord, Cyberpunk.
+            - 📱 **Native System Home Launcher Intent**: Set as default Android home launcher.
+
+            Download the attached `OmarchyLauncher.apk` file below to install on your Android device!
+          files: |
+            android/app/build/outputs/apk/release/*.apk
+            *.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
