@@ -91,16 +91,21 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          name: "Omarchy Launcher v1.6.0"
+          name: "Omarchy Multi-OS Launcher v2.0.0"
           body: |
-            ## 📱 Omarchy Launcher for Android v1.6.0 (Hotseat Dock & Native Haptics Release)
+            ## 📱 Omarchy Multi-OS Launcher v2.0.0 (Windows 11 & macOS Launcher Modes)
             
-            ### ✨ New Enhancements in v1.6.0:
-            - 📌 **Favorite Apps Pinned Hotseat Dock**: Glassmorphic pinned shelf above bottom navigation dock for 5 quick-launch favorite apps. Pin/Unpin any app directly from the long-press modal!
-            - 📳 **Native Device Haptic Feedback**: Tactile vibration feedback (`HapticFeedbackConstants.KEYBOARD_TAP`) on app launch, letter scroller drag, pill filtering, and dock interactions.
-            - 🔤 **Niagara Alphabet Fast-Scroller**: Interactive vertical A-Z index bar for 1-tap fast jump to any app letter.
-            - 🔷 **Custom Icon Shapes**: Live switcher for Squircle, Circle, Square, and Teardrop icons.
-            - ☀️ **At-a-Glance Weather & Battery Pill**: Header widget showing weather condition & live battery status.
+            ### 🚀 Major Multi-OS Features in v2.0.0:
+            - 🪟 **Windows 11 Android Launcher Mode**:
+              - Fluent Mica glass design system with centered Taskbar.
+              - Windows 11 Start Menu overlay with Pinned Apps grid, Instant Search box, and Power User options (`🪟`).
+            -  **macOS Sonoma / Sequoia Android Launcher Mode**:
+              - Top macOS Menu Bar displaying Apple logo (``), active app title, battery status, and status clock.
+              - Glassmorphic floating bottom Dock.
+            - ⚡ **Omarchy Cyberpunk Mode**: Classic glassmorphic launcher experience.
+            - 📌 **Favorite Apps Hotseat Dock**: Pinned app shelf for your 5 top favorite applications.
+            - 📳 **Native Device Haptic Feedback**: Tactile vibration feedback on all launcher interactions.
+            - ⚡ **4-Byte ZipAligned & V1/V2/V3 Dual Signed**: Fully optimized for Motorola Edge, Pixel, Samsung, Xiaomi, and Android 14/15 devices.
 
             Download `OmarchyLauncher.apk` below and install directly on your Android device!
           files: |

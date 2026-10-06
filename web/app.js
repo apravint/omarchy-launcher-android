@@ -1,4 +1,4 @@
-// Omarchy Android Launcher Client Logic with Native Android Bridge & Top-Tier Features
+// Omarchy Multi-OS Android Launcher (Omarchy / Windows 11 / macOS Modes)
 let INSTALLED_APPS = [];
 let PINNED_HOTSEAT_PKGS = JSON.parse(localStorage.getItem('omarchy_hotseat') || '["com.android.chrome", "com.whatsapp", "com.termux", "com.android.camera", "com.android.settings"]');
 let CURRENT_APP_SELECTED = null;
@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSavedTheme();
   loadSavedIconShape();
   loadSavedGridDensity();
+  loadSavedOSMode();
   loadRealInstalledApps();
 
   // Home key handler from native Java
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollToTop();
     closeAppModal();
     closeThemeModal();
+    closeWin11StartMenu();
     triggerHaptic();
   };
 
@@ -121,6 +123,95 @@ function triggerHaptic() {
   }
 }
 
+// OS Launcher Experience Switcher (Omarchy / Windows 11 / macOS)
+function setOSMode(mode) {
+  triggerHaptic();
+  document.body.classList.remove('mode-omarchy', 'mode-win11', 'mode-macos');
+  document.body.classList.add(`mode-${mode}`);
+
+  document.querySelectorAll('.os-btn').forEach(btn => {
+    if (btn.dataset.os === mode) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  const macosBar = document.getElementById('macos-bar');
+  const win11Btn = document.getElementById('dock-btn-win11');
+  const searchIcon = document.getElementById('search-mode-icon');
+
+  if (mode === 'macos') {
+    macosBar.style.display = 'flex';
+    win11Btn.style.display = 'none';
+    searchIcon.innerText = '';
+  } else if (mode === 'win11') {
+    macosBar.style.display = 'none';
+    win11Btn.style.display = 'inline-block';
+    searchIcon.innerText = '🪟';
+    renderWin11Apps(INSTALLED_APPS);
+  } else {
+    macosBar.style.display = 'none';
+    win11Btn.style.display = 'none';
+    searchIcon.innerText = '⚡';
+  }
+
+  localStorage.setItem('omarchy_os_mode', mode);
+}
+
+function loadSavedOSMode() {
+  const saved = localStorage.getItem('omarchy_os_mode') || 'omarchy';
+  setOSMode(saved);
+}
+
+// Windows 11 Start Menu Modal Handlers
+function toggleWin11StartMenu() {
+  triggerHaptic();
+  const modal = document.getElementById('win11-modal');
+  modal.classList.toggle('active');
+}
+
+function closeWin11StartMenu() {
+  const modal = document.getElementById('win11-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function renderWin11Apps(appList) {
+  const grid = document.getElementById('win11-app-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  appList.forEach(app => {
+    const item = document.createElement('div');
+    item.className = 'app-item';
+    item.onclick = () => {
+      triggerHaptic();
+      closeWin11StartMenu();
+      triggerAppLaunch(app);
+    };
+
+    const iconHtml = app.iconUrl 
+      ? `<img src="${app.iconUrl}" style="width:100%; height:100%; object-fit:contain;" />`
+      : app.icon || '📱';
+
+    item.innerHTML = `
+      <div class="app-icon">${iconHtml}</div>
+      <div class="app-label" title="${app.name}">${app.name}</div>
+    `;
+    grid.appendChild(item);
+  });
+}
+
+function filterWin11Apps(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) {
+    renderWin11Apps(INSTALLED_APPS);
+  } else {
+    const filtered = INSTALLED_APPS.filter(a => a.name.toLowerCase().includes(q));
+    renderWin11Apps(filtered);
+  }
+}
+
 function renderHotseatDock() {
   const container = document.getElementById('hotseat-container');
   if (!container) return;
@@ -159,7 +250,7 @@ function togglePinHotseat(app) {
     PINNED_HOTSEAT_PKGS.splice(index, 1);
   } else {
     if (PINNED_HOTSEAT_PKGS.length >= 5) {
-      PINNED_HOTSEAT_PKGS.shift(); // keep max 5
+      PINNED_HOTSEAT_PKGS.shift();
     }
     PINNED_HOTSEAT_PKGS.push(app.packageName);
   }
@@ -317,6 +408,7 @@ function loadRealInstalledApps() {
         updateCategoryCounts();
         renderHotseatDock();
         renderAppGrid(INSTALLED_APPS);
+        renderWin11Apps(INSTALLED_APPS);
         return;
       }
     } catch (err) {
@@ -328,6 +420,7 @@ function loadRealInstalledApps() {
   updateCategoryCounts();
   renderHotseatDock();
   renderAppGrid(INSTALLED_APPS);
+  renderWin11Apps(INSTALLED_APPS);
 }
 
 function updateCategoryCounts() {
@@ -417,9 +510,12 @@ function updateClock() {
   
   const timeElem = document.getElementById('time-val');
   const dateElem = document.getElementById('date-val');
+  const macosClock = document.getElementById('macos-clock');
 
-  if (timeElem) timeElem.innerText = `${hours}:${minutes}`;
+  const formattedTime = `${hours}:${minutes}`;
+  if (timeElem) timeElem.innerText = formattedTime;
   if (dateElem) dateElem.innerText = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+  if (macosClock) macosClock.innerText = formattedTime;
 }
 
 function clearSearch() {

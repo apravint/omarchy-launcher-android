@@ -1,5 +1,5 @@
-/* Omarchy Android Launcher - Premium Glassmorphic Mobile Design System */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+/* Omarchy Android Launcher - Multi-OS Glassmorphic Mobile Design System */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Segoe+UI:wght@400;600;700&display=swap');
 
 :root {
   --bg-primary: radial-gradient(circle at top right, #1e1b4b, #0f172a, #090d16);
@@ -70,6 +70,22 @@ body.theme-oled {
   --accent-secondary: #818cf8;
 }
 
+/* OS Experience Styles */
+body.mode-win11 {
+  --bg-primary: radial-gradient(circle at top center, #1f293d, #0f172a, #0b0f19);
+  --accent-primary: #0078d4;
+  --accent-secondary: #2b88d8;
+  --radius-card: 16px;
+  font-family: 'Segoe UI', 'Plus Jakarta Sans', sans-serif;
+}
+
+body.mode-macos {
+  --bg-primary: radial-gradient(circle at bottom center, #2e1065, #0f172a, #030712);
+  --accent-primary: #38bdf8;
+  --accent-secondary: #a855f7;
+  --radius-app: 18px;
+}
+
 /* Icon Mask Shapes */
 body.shape-squircle .app-icon { border-radius: var(--radius-app); }
 body.shape-circle .app-icon { border-radius: 50%; }
@@ -95,11 +111,49 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2.5rem 1.1rem 1.1rem;
+  padding: 2.2rem 1.1rem 1.1rem;
   transition: background 0.4s ease;
 }
 
-/* Header Clock & At-a-Glance Widget */
+/* macOS Top Menu Bar */
+.macos-menu-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 28px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-glass);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  font-size: 0.75rem;
+  z-index: 50;
+}
+
+.macos-left, .macos-right {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.apple-logo {
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.app-title {
+  font-weight: 700;
+}
+
+.menu-item {
+  color: var(--text-muted);
+}
+
+/* Header Clock Widget */
 .clock-widget {
   text-align: center;
   margin-top: 0.1rem;
@@ -498,6 +552,74 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* Windows 11 Start Menu Modal Card */
+.win11-start-card {
+  background: rgba(24, 32, 47, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 380px;
+  padding: 1.25rem;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.win11-search-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.win11-search-box input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  width: 100%;
+  font-size: 0.85rem;
+}
+
+.win11-search-box input:focus { outline: none; }
+
+.win11-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.win11-app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem 0.5rem;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.win11-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-glass);
+  padding-top: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.win11-power-btn {
+  background: transparent;
+  border: none;
+  color: #ff4757;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
 /* Modal Overlay & Card */
 .modal-overlay {
   position: fixed;
@@ -575,25 +697,25 @@ body {
   margin: 0.75rem 0 0.35rem;
 }
 
-.shape-selector-row {
+.os-mode-row, .shape-selector-row {
   display: flex;
   gap: 0.4rem;
   margin-bottom: 0.4rem;
 }
 
-.shape-btn {
+.os-btn, .shape-btn {
   flex: 1;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-glass);
   color: var(--text-muted);
-  padding: 0.35rem 0.2rem;
+  padding: 0.4rem 0.2rem;
   border-radius: 12px;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
 }
 
-.shape-btn.active {
+.os-btn.active, .shape-btn.active {
   background: var(--accent-primary);
   color: #fff;
   border-color: var(--accent-primary);
