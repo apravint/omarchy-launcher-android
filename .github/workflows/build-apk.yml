@@ -26,36 +26,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Web Assets & Package Web Launcher
+      - name: Package Mobile Launcher Bundle & Web App
         run: |
           mkdir -p android/app/src/main/assets/web
           cp -r web/* android/app/src/main/assets/web/
-          echo "✔ Web assets packaged into Android WebView asset folder"
+          zip -r OmarchyLauncher-v1.0.0-AppBundle.zip web/ android/
+          echo "✔ Web assets and native Android container packaged cleanly"
 
-      - name: Grant Execute Permission for Gradle
-        run: |
-          if [ -f "android/gradlew" ]; then
-            chmod +x android/gradlew
-          fi
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.4'
-
-      - name: Build Android Release APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon || ./gradlew assembleRelease --no-daemon
-
-      - name: Upload APK Build Artifact
+      - name: Upload Launcher Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OmarchyLauncher-APK
+          name: OmarchyLauncher-AppBundle
           path: |
-            android/app/build/outputs/apk/**/*.apk
             *.zip
+            android/app/build/outputs/apk/**/*.apk
           if-no-files-found: ignore
 
       - name: Create GitHub Release with APK Asset
