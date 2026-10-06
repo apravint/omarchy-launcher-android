@@ -47,8 +47,8 @@ jobs:
             build/gen/com/apravint/omarchylauncher/R.java \
             android/app/src/main/java/com/apravint/omarchylauncher/MainActivity.java
             
-          # 3. D8 Dexing
-          $BUILD_TOOLS/d8 --output build/ \
+          # 3. D8 Dexing with Min API 24
+          $BUILD_TOOLS/d8 --min-api 24 --output build/ \
             build/obj/com/apravint/omarchylauncher/*.class
             
           # 4. Package Unsigned APK
@@ -56,18 +56,29 @@ jobs:
             -M android/app/src/main/AndroidManifest.xml \
             -S android/app/src/main/res \
             -I $PLATFORM \
-            -F OmarchyLauncher-unsigned.apk build/apk_assets
+            -F OmarchyLauncher-raw.apk build/apk_assets
             
           # 5. Add classes.dex to APK
           cd build
-          $BUILD_TOOLS/aapt add ../OmarchyLauncher-unsigned.apk classes.dex
+          $BUILD_TOOLS/aapt add ../OmarchyLauncher-raw.apk classes.dex
           cd ..
           
-          # 6. Generate Keystore & Sign APK
-          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          $BUILD_TOOLS/apksigner sign --ks debug.keystore --ks-pass pass:android --out OmarchyLauncher.apk OmarchyLauncher-unsigned.apk
+          # 6. 4-Byte ZipAlign (Required for Android 14/15 Motorola devices)
+          $BUILD_TOOLS/zipalign -v 4 OmarchyLauncher-raw.apk OmarchyLauncher-aligned.apk
           
-          echo "✔ Successfully compiled and signed OmarchyLauncher.apk!"
+          # 7. Keystore Generation & V1/V2/V3 Signature Scheme Signing
+          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          $BUILD_TOOLS/apksigner sign \
+            --ks debug.keystore \
+            --ks-pass pass:android \
+            --key-pass pass:android \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --out OmarchyLauncher.apk \
+            OmarchyLauncher-aligned.apk
+          
+          echo "✔ Successfully ZipAligned & V2/V3 Signed OmarchyLauncher.apk!"
           ls -lh OmarchyLauncher.apk
 
       - name: Upload APK Build Artifact
@@ -80,17 +91,17 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          name: "Omarchy Launcher v1.0.0"
+          name: "Omarchy Launcher v1.1.0"
           body: |
-            ## 📱 Omarchy Launcher for Android v1.0.0 Release
+            ## 📱 Omarchy Launcher for Android v1.1.0 (Motorola / Android 14+ Compatible)
             
-            ### ✨ Features Included:
+            ### ✨ Features & Android 14/15 Fixes:
+            - ⚡ **ZipAligned & V2/V3 Signed**: Fully compatible with Motorola Edge, Pixel, and modern 64-bit Android 14/15 phones.
             - ⚡ **Built-in AI Assistant Bar**: Quick AI prompts directly on home screen.
-            - 🔮 **Glassmorphic App Cards & Grid**: Categorized app launcher (Dev & AI, System, Media).
+            - 🔮 **Glassmorphic App Cards & Grid**: Categorized app launcher.
             - 🎨 **Omarchy 22 Theme Palette System**: Switch live between Tokyo Night, Catppuccin, Nord, Cyberpunk.
-            - 📱 **Native System Home Launcher Intent**: Set as default Android home launcher.
 
-            Download the attached **`OmarchyLauncher.apk`** file below to install directly on your Android device!
+            Download `OmarchyLauncher.apk` below and install directly on your Motorola Edge!
           files: |
             OmarchyLauncher.apk
         env:
