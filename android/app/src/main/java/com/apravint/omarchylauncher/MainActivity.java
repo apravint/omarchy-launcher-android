@@ -172,6 +172,22 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void performHaptics() {
+            try {
+                if (webView != null) {
+                    webView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            webView.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @JavascriptInterface
         public String getDeviceInfo() {
             try {
                 JSONObject info = new JSONObject();

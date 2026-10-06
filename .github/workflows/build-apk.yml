@@ -91,18 +91,18 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          name: "Omarchy Launcher v1.5.0"
+          name: "Omarchy Launcher v1.6.0"
           body: |
-            ## 📱 Omarchy Launcher for Android v1.5.0 (Top-Notch Launcher Features Release)
+            ## 📱 Omarchy Launcher for Android v1.6.0 (Hotseat Dock & Native Haptics Release)
             
-            ### 🌟 Top Launcher Comparative Features:
-            - 🔤 **Niagara-Style Alphabet Fast Scroller**: Interactive vertical A-Z index bar on the right side of screen for instant 1-tap scrolling to any app letter.
-            - 🔷 **Custom App Icon Masks**: Switch live between **Squircle**, **Circle**, **Square**, and **Teardrop** icon shapes (competing with Lawnchair & Smart Launcher 6).
-            - ☀️ **Pixel-Style At-a-Glance Widget**: Live weather preview and battery percentage status pill right on top of the date & clock header.
-            - 🔍 **Universal Search Chips (Web & Play Store)**: Quick fallback chips to search Google Web or Play Store for any query directly from the launcher search bar.
-            - ⚡ **4-Byte ZipAligned & V1/V2/V3 Dual Signed**: Fully optimized for Motorola Edge, Pixel, Samsung, Xiaomi, and Android 14/15 devices.
+            ### ✨ New Enhancements in v1.6.0:
+            - 📌 **Favorite Apps Pinned Hotseat Dock**: Glassmorphic pinned shelf above bottom navigation dock for 5 quick-launch favorite apps. Pin/Unpin any app directly from the long-press modal!
+            - 📳 **Native Device Haptic Feedback**: Tactile vibration feedback (`HapticFeedbackConstants.KEYBOARD_TAP`) on app launch, letter scroller drag, pill filtering, and dock interactions.
+            - 🔤 **Niagara Alphabet Fast-Scroller**: Interactive vertical A-Z index bar for 1-tap fast jump to any app letter.
+            - 🔷 **Custom Icon Shapes**: Live switcher for Squircle, Circle, Square, and Teardrop icons.
+            - ☀️ **At-a-Glance Weather & Battery Pill**: Header widget showing weather condition & live battery status.
 
-            Download `OmarchyLauncher.apk` below and install directly on your Android phone!
+            Download `OmarchyLauncher.apk` below and install directly on your Android device!
           files: |
             OmarchyLauncher.apk
         env:

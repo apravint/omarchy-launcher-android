@@ -1,5 +1,6 @@
 // Omarchy Android Launcher Client Logic with Native Android Bridge & Top-Tier Features
 let INSTALLED_APPS = [];
+let PINNED_HOTSEAT_PKGS = JSON.parse(localStorage.getItem('omarchy_hotseat') || '["com.android.chrome", "com.whatsapp", "com.termux", "com.android.camera", "com.android.settings"]');
 let CURRENT_APP_SELECTED = null;
 
 const THEMES_LIST = [
@@ -38,11 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollToTop();
     closeAppModal();
     closeThemeModal();
+    triggerHaptic();
   };
 
   // Category Filter Pills
   document.querySelectorAll('.category-pills .pill').forEach(pill => {
     pill.addEventListener('click', () => {
+      triggerHaptic();
       document.querySelectorAll('.category-pills .pill').forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
       
@@ -77,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     aiInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
+        triggerHaptic();
         const query = aiInput.value.trim();
         if (query) {
           const match = INSTALLED_APPS.find(a => a.name.toLowerCase() === query.toLowerCase());
@@ -93,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnWeb) {
     btnWeb.onclick = () => {
+      triggerHaptic();
       const query = aiInput.value.trim();
       if (query) searchWeb(query);
     };
@@ -100,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnStore) {
     btnStore.onclick = () => {
+      triggerHaptic();
       const query = aiInput.value.trim();
       if (query) searchPlayStore(query);
     };
@@ -108,6 +114,60 @@ document.addEventListener('DOMContentLoaded', () => {
   renderThemeGrid();
   buildAlphabetIndexer();
 });
+
+function triggerHaptic() {
+  if (window.AndroidLauncher && window.AndroidLauncher.performHaptics) {
+    try { window.AndroidLauncher.performHaptics(); } catch (e) {}
+  }
+}
+
+function renderHotseatDock() {
+  const container = document.getElementById('hotseat-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const pinnedApps = INSTALLED_APPS.filter(a => PINNED_HOTSEAT_PKGS.includes(a.packageName));
+  
+  if (pinnedApps.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'flex';
+
+  pinnedApps.slice(0, 5).forEach(app => {
+    const item = document.createElement('div');
+    item.className = 'hotseat-item';
+    item.onclick = () => {
+      triggerHaptic();
+      triggerAppLaunch(app);
+    };
+
+    const iconHtml = app.iconUrl 
+      ? `<img src="${app.iconUrl}" style="width:100%; height:100%; object-fit:contain;" />`
+      : app.icon || '📱';
+
+    item.innerHTML = `<div class="app-icon">${iconHtml}</div>`;
+    container.appendChild(item);
+  });
+}
+
+function togglePinHotseat(app) {
+  if (!app || !app.packageName) return;
+  
+  const index = PINNED_HOTSEAT_PKGS.indexOf(app.packageName);
+  if (index > -1) {
+    PINNED_HOTSEAT_PKGS.splice(index, 1);
+  } else {
+    if (PINNED_HOTSEAT_PKGS.length >= 5) {
+      PINNED_HOTSEAT_PKGS.shift(); // keep max 5
+    }
+    PINNED_HOTSEAT_PKGS.push(app.packageName);
+  }
+
+  localStorage.setItem('omarchy_hotseat', JSON.stringify(PINNED_HOTSEAT_PKGS));
+  renderHotseatDock();
+  closeAppModal();
+}
 
 function searchWeb(query) {
   const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
@@ -138,7 +198,10 @@ function buildAlphabetIndexer() {
     const span = document.createElement('span');
     span.className = 'fast-letter';
     span.innerText = letter;
-    span.onclick = () => scrollToLetter(letter);
+    span.onclick = () => {
+      triggerHaptic();
+      scrollToLetter(letter);
+    };
     indexer.appendChild(span);
   });
 }
@@ -160,6 +223,7 @@ function scrollToLetter(letter) {
 }
 
 function setDefaultHomeLauncher() {
+  triggerHaptic();
   if (window.AndroidLauncher && window.AndroidLauncher.setAsDefaultHome) {
     window.AndroidLauncher.setAsDefaultHome();
   } else {
@@ -168,6 +232,7 @@ function setDefaultHomeLauncher() {
 }
 
 function setGridDensity(cols) {
+  triggerHaptic();
   const grid = document.getElementById('app-grid-container');
   grid.className = `app-grid grid-cols-${cols}`;
   
@@ -188,6 +253,7 @@ function loadSavedGridDensity() {
 }
 
 function setIconShape(shape) {
+  triggerHaptic();
   document.body.classList.remove('shape-squircle', 'shape-circle', 'shape-rounded', 'shape-teardrop');
   document.body.classList.add(`shape-${shape}`);
   
@@ -249,6 +315,7 @@ function loadRealInstalledApps() {
         
         INSTALLED_APPS.sort((a, b) => a.name.localeCompare(b.name));
         updateCategoryCounts();
+        renderHotseatDock();
         renderAppGrid(INSTALLED_APPS);
         return;
       }
@@ -259,6 +326,7 @@ function loadRealInstalledApps() {
 
   INSTALLED_APPS = MOCK_FALLBACK_APPS;
   updateCategoryCounts();
+  renderHotseatDock();
   renderAppGrid(INSTALLED_APPS);
 }
 
@@ -299,14 +367,21 @@ function renderAppGrid(appList) {
 
     let pressTimer;
 
-    item.addEventListener('click', () => triggerAppLaunch(app));
+    item.addEventListener('click', () => {
+      triggerHaptic();
+      triggerAppLaunch(app);
+    });
 
     item.addEventListener('touchstart', () => {
-      pressTimer = setTimeout(() => openAppModal(app), 600);
+      pressTimer = setTimeout(() => {
+        triggerHaptic();
+        openAppModal(app);
+      }, 550);
     });
     item.addEventListener('touchend', () => clearTimeout(pressTimer));
     item.addEventListener('contextmenu', (e) => {
       e.preventDefault();
+      triggerHaptic();
       openAppModal(app);
     });
 
@@ -359,11 +434,13 @@ function clearSearch() {
 }
 
 function scrollToTop() {
+  triggerHaptic();
   const container = document.getElementById('main-scroll-area');
   if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function openSystemSettings() {
+  triggerHaptic();
   if (window.AndroidLauncher && window.AndroidLauncher.openSettings) {
     window.AndroidLauncher.openSettings();
   } else {
@@ -372,6 +449,7 @@ function openSystemSettings() {
 }
 
 function openWallpaper() {
+  triggerHaptic();
   if (window.AndroidLauncher && window.AndroidLauncher.openWallpaperPicker) {
     window.AndroidLauncher.openWallpaperPicker();
   } else {
@@ -380,10 +458,12 @@ function openWallpaper() {
 }
 
 function openThemeModal() {
+  triggerHaptic();
   document.getElementById('theme-modal').classList.add('active');
 }
 
 function closeThemeModal() {
+  triggerHaptic();
   document.getElementById('theme-modal').classList.remove('active');
 }
 
@@ -395,7 +475,10 @@ function renderThemeGrid() {
   THEMES_LIST.forEach(t => {
     const item = document.createElement('div');
     item.className = 'theme-item';
-    item.onclick = () => applyTheme(t.id);
+    item.onclick = () => {
+      triggerHaptic();
+      applyTheme(t.id);
+    };
 
     item.innerHTML = `
       <div class="theme-dot" style="background: ${t.color}"></div>
@@ -431,12 +514,24 @@ function openAppModal(app) {
     iconContainer.innerHTML = app.icon || '📱';
   }
 
+  const isPinned = PINNED_HOTSEAT_PKGS.includes(app.packageName);
+  const pinBtn = document.getElementById('btn-pin-hotseat');
+  if (pinBtn) {
+    pinBtn.innerText = isPinned ? '📌 Unpin from Dock' : '📌 Pin to Favorite Dock';
+    pinBtn.onclick = () => {
+      triggerHaptic();
+      togglePinHotseat(app);
+    };
+  }
+
   document.getElementById('btn-launch-modal').onclick = () => {
+    triggerHaptic();
     closeAppModal();
     triggerAppLaunch(app);
   };
 
   document.getElementById('btn-info-modal').onclick = () => {
+    triggerHaptic();
     closeAppModal();
     if (app.packageName && window.AndroidLauncher && window.AndroidLauncher.openAppDetails) {
       window.AndroidLauncher.openAppDetails(app.packageName);
@@ -446,6 +541,7 @@ function openAppModal(app) {
   };
 
   document.getElementById('btn-uninstall-modal').onclick = () => {
+    triggerHaptic();
     closeAppModal();
     if (app.packageName && window.AndroidLauncher && window.AndroidLauncher.uninstallApp) {
       window.AndroidLauncher.uninstallApp(app.packageName);
