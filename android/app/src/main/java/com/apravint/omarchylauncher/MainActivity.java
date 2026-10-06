@@ -88,6 +88,51 @@ public class MainActivity extends Activity {
             return false;
         }
 
+        @JavascriptInterface
+        public void openSettings() {
+            try {
+                Intent intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                startActivity(intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @JavascriptInterface
+        public void openAppDetails(String packageName) {
+            try {
+                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.setData(android.net.Uri.parse("package:" + packageName));
+                startActivity(intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @JavascriptInterface
+        public void openWallpaperPicker() {
+            try {
+                Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
+                startActivity(Intent.createChooser(intent, "Select Wallpaper"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @JavascriptInterface
+        public String getDeviceInfo() {
+            try {
+                JSONObject info = new JSONObject();
+                info.put("model", android.os.Build.MODEL);
+                info.put("manufacturer", android.os.Build.MANUFACTURER);
+                info.put("androidVersion", android.os.Build.VERSION.RELEASE);
+                info.put("sdkInt", android.os.Build.VERSION.SDK_INT);
+                return info.toString();
+            } catch (Exception e) {
+                return "{}";
+            }
+        }
+
         private String getAppIconBase64(PackageManager pm, ResolveInfo ri) {
             try {
                 Drawable icon = ri.loadIcon(pm);

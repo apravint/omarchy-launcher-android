@@ -8,42 +8,76 @@
 </head>
 <body>
 
-  <!-- Top Clock & Date Widget -->
+  <!-- Top Clock & Date Header -->
   <div class="clock-widget">
-    <div class="time-display" id="time-val">14:38</div>
-    <div class="date-display" id="date-val">Thursday, Oct 26</div>
+    <div class="time-display" id="time-val">12:00</div>
+    <div class="date-display" id="date-val">Loading...</div>
+    <div class="device-badge-pill" id="device-badge">⚡ Omarchy OS • Android</div>
   </div>
 
   <!-- AI Command & Search Bar -->
   <div class="ai-bar-card">
     <div class="ai-icon">⚡</div>
-    <input type="text" class="ai-input" id="ai-prompt-input" placeholder="Ask AI / Run Termux command..." autocomplete="off">
+    <input type="text" class="ai-input" id="ai-prompt-input" placeholder="Search apps or run AI prompt..." autocomplete="off">
+    <button class="clear-btn" id="search-clear" style="display:none;" onclick="clearSearch()">✕</button>
   </div>
 
-  <!-- Main Launcher Content Area -->
-  <div style="flex: 1; overflow-y: auto;">
+  <!-- Main Scrollable App Container -->
+  <div class="main-content-area">
     
     <!-- Category Filter Pills -->
     <div class="category-pills">
-      <div class="pill active" data-category="All">All Apps</div>
-      <div class="pill" data-category="Dev & AI">Dev & AI</div>
-      <div class="pill" data-category="System">System</div>
-      <div class="pill" data-category="Media">Media</div>
+      <div class="pill active" data-category="All">All Apps <span class="badge" id="count-all">0</span></div>
+      <div class="pill" data-category="System">System <span class="badge" id="count-system">0</span></div>
+      <div class="pill" data-category="Dev & AI">Dev & AI <span class="badge" id="count-dev">0</span></div>
+      <div class="pill" data-category="User">Installed <span class="badge" id="count-user">0</span></div>
     </div>
 
     <!-- App Grid -->
     <div class="app-grid" id="app-grid-container">
-      <!-- Dynamically populated by app.js -->
+      <div class="loading-spinner">Scanning installed apps...</div>
     </div>
 
   </div>
 
-  <!-- Bottom Navigation Dock -->
+  <!-- Bottom Glass Dock -->
   <div class="bottom-bar">
-    <button class="bar-btn active">🏠</button>
-    <button class="bar-btn" onclick="switchThemeModal()">🎨</button>
-    <button class="bar-btn" onclick="alert('⚡ Termux AI Daemon Active')">⚡</button>
-    <button class="bar-btn" onclick="alert('⚙️ Omarchy Launcher Settings')">⚙️</button>
+    <button class="bar-btn active" title="Home" onclick="scrollToTop()">🏠</button>
+    <button class="bar-btn" title="Themes" onclick="openThemeModal()">🎨</button>
+    <button class="bar-btn" title="Wallpaper" onclick="openWallpaper()">🖼️</button>
+    <button class="bar-btn" title="Settings" onclick="openSystemSettings()">⚙️</button>
+  </div>
+
+  <!-- Theme Selector Modal -->
+  <div class="modal-overlay" id="theme-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🎨 Omarchy Theme Engine</h3>
+        <button class="close-btn" onclick="closeThemeModal()">✕</button>
+      </div>
+      <p class="modal-sub">Choose from 22 curated cyberpunk & dark palettes:</p>
+      <div class="theme-grid" id="theme-grid-container">
+        <!-- Rendered by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- App Info Context Modal -->
+  <div class="modal-overlay" id="app-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="app-modal-title">App Details</h3>
+        <button class="close-btn" onclick="closeAppModal()">✕</button>
+      </div>
+      <div class="app-modal-content">
+        <div id="app-modal-icon" class="app-modal-icon-container"></div>
+        <p id="app-modal-pkg" class="app-modal-pkg-name"></p>
+        <div class="modal-actions">
+          <button class="modal-action-btn primary" id="btn-launch-modal">🚀 Launch App</button>
+          <button class="modal-action-btn secondary" id="btn-info-modal">ℹ️ App Settings</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
