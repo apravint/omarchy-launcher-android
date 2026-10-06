@@ -91,19 +91,19 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          name: "Omarchy Launcher v1.3.0"
+          name: "Omarchy Launcher v1.4.0"
           body: |
-            ## 📱 Omarchy Launcher for Android v1.3.0 (Major Features & Performance Release)
+            ## 📱 Omarchy Launcher for Android v1.4.0 (Moto Launcher Parity Update)
             
-            ### 🚀 New Features & Enhancements:
-            - 📲 **Long-Press App Context Modal**: Press and hold any app to view full package details or open system Android App Info settings.
-            - 🎨 **Omarchy Theme Engine**: Live interactive theme switcher with Tokyo Night, Catppuccin, Nord, Cyberpunk 2077, Dracula, Sunset Neon, and OLED Pure Black.
-            - ⚡ **Device Status Badge**: Automatic device model and Android version detection badge right on your home screen.
-            - 📊 **App Category Badges**: Dynamic app count badges for System, Dev & AI, and User installed apps.
-            - 🖼️ **Wallpaper & Settings Dock Shortcuts**: Quick native triggers to set wallpaper and open system settings.
-            - ⚡ **4-Byte ZipAligned & V1/V2/V3 Signed**: Fully optimized for Motorola Edge 70 Fusion, Pixel, and Android 14/15 devices.
+            ### ⚡ Standard Motorola Launcher Parity Features:
+            - 🏠 **Set as Default Home Launcher**: Dedicated button to trigger Android's Default Home App chooser (`ACTION_HOME_SETTINGS`). Pressing your phone's Home button opens Omarchy Launcher automatically!
+            - 📱 **Grid Density Customization (4x4, 5x5, 6x6)**: Toggle app drawer grid density dynamically to fit 4, 5, or 6 apps per row.
+            - ⚡ **Hardware Acceleration & Immersive Edge-to-Edge**: Enabled native hardware acceleration flags (`FLAG_HARDWARE_ACCELERATED`) & translucent immersive status/navigation bar flags (`FLAG_LAYOUT_NO_LIMITS`).
+            - 🔍 **High DPI 128x128 Adaptive Icons**: Enhanced app icon extraction for crisp, sharp rendering on high-resolution Motorola OLED screens.
+            - 🗑️ **Native Uninstall Trigger**: Directly uninstall any app from the long-press app details modal (`ACTION_DELETE`).
+            - 🚀 **Native Home Key Handler**: `onNewIntent` bridge instantly returns you to the top of your home screen whenever the home gesture/button is pressed.
 
-            Download `OmarchyLauncher.apk` below and install directly on your device!
+            Download `OmarchyLauncher.apk` below and install directly on your Motorola Edge!
           files: |
             OmarchyLauncher.apk
         env:

@@ -29,7 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadDeviceInfo();
   loadSavedTheme();
+  loadSavedGridDensity();
   loadRealInstalledApps();
+
+  // Home key handler from native Java
+  window.onHomePressed = () => {
+    scrollToTop();
+    closeAppModal();
+    closeThemeModal();
+  };
 
   // Category Filter Pills
   document.querySelectorAll('.category-pills .pill').forEach(pill => {
@@ -65,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'Enter') {
         const query = aiInput.value.trim();
         if (query) {
-          // If query matches exact package or app, launch it directly!
           const match = INSTALLED_APPS.find(a => a.name.toLowerCase() === query.toLowerCase());
           if (match) {
             triggerAppLaunch(match);
@@ -80,9 +87,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Setup Theme Modal Grid
   renderThemeGrid();
 });
+
+function setDefaultHomeLauncher() {
+  if (window.AndroidLauncher && window.AndroidLauncher.setAsDefaultHome) {
+    window.AndroidLauncher.setAsDefaultHome();
+  } else {
+    alert('📱 Select Omarchy Launcher as your Home app in Android Settings!');
+  }
+}
+
+function setGridDensity(cols) {
+  const grid = document.getElementById('app-grid-container');
+  grid.className = `app-grid grid-cols-${cols}`;
+  
+  document.querySelectorAll('.density-btn').forEach(btn => {
+    if (btn.dataset.cols == cols) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  localStorage.setItem('omarchy_grid_cols', cols);
+}
+
+function loadSavedGridDensity() {
+  const savedCols = localStorage.getItem('omarchy_grid_cols') || 5;
+  setGridDensity(savedCols);
+}
 
 function loadDeviceInfo() {
   const badge = document.getElementById('device-badge');
@@ -124,7 +158,6 @@ function loadRealInstalledApps() {
           };
         });
         
-        // Sort alphabetically
         INSTALLED_APPS.sort((a, b) => a.name.localeCompare(b.name));
         updateCategoryCounts();
         renderAppGrid(INSTALLED_APPS);
@@ -135,7 +168,6 @@ function loadRealInstalledApps() {
     }
   }
 
-  // Fallback for Web preview
   INSTALLED_APPS = MOCK_FALLBACK_APPS;
   updateCategoryCounts();
   renderAppGrid(INSTALLED_APPS);
@@ -179,7 +211,6 @@ function renderAppGrid(appList) {
 
     item.addEventListener('click', () => triggerAppLaunch(app));
 
-    // Long press to view details
     item.addEventListener('touchstart', () => {
       pressTimer = setTimeout(() => openAppModal(app), 600);
     });
@@ -190,7 +221,7 @@ function renderAppGrid(appList) {
     });
 
     const iconHtml = app.iconUrl 
-      ? `<img src="${app.iconUrl}" style="width:38px; height:38px; object-fit:contain;" />`
+      ? `<img src="${app.iconUrl}" style="width:100%; height:100%; object-fit:contain;" />`
       : app.icon || '📱';
 
     item.innerHTML = `
@@ -235,11 +266,10 @@ function clearSearch() {
 }
 
 function scrollToTop() {
-  const container = document.querySelector('.main-content-area');
+  const container = document.getElementById('main-scroll-area');
   if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// System Bridge Shortcuts
 function openSystemSettings() {
   if (window.AndroidLauncher && window.AndroidLauncher.openSettings) {
     window.AndroidLauncher.openSettings();
@@ -256,7 +286,6 @@ function openWallpaper() {
   }
 }
 
-// Theme Modal Logic
 function openThemeModal() {
   document.getElementById('theme-modal').classList.add('active');
 }
@@ -294,7 +323,6 @@ function loadSavedTheme() {
   document.body.className = `theme-${saved}`;
 }
 
-// App Details Context Modal
 function openAppModal(app) {
   CURRENT_APP_SELECTED = app;
   document.getElementById('app-modal-title').innerText = app.name;
@@ -318,6 +346,15 @@ function openAppModal(app) {
       window.AndroidLauncher.openAppDetails(app.packageName);
     } else {
       alert(`App Info: ${app.packageName}`);
+    }
+  };
+
+  document.getElementById('btn-uninstall-modal').onclick = () => {
+    closeAppModal();
+    if (app.packageName && window.AndroidLauncher && window.AndroidLauncher.uninstallApp) {
+      window.AndroidLauncher.uninstallApp(app.packageName);
+    } else {
+      alert(`Uninstall: ${app.packageName}`);
     }
   };
 

@@ -1,4 +1,4 @@
-package com.apravint.omarchylauncher;
+package com.apravint/omarchylauncher;
 
 import android.os.Bundle;
 import android.webkit.WebView;
@@ -13,6 +13,9 @@ import android.graphics.drawable.Drawable;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.Base64;
+import android.view.Window;
+import android.view.WindowManager;
+import android.net.Uri;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import org.json.JSONArray;
@@ -25,7 +28,18 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
+        // Hardware acceleration & edge-to-edge immersive system bars
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+        );
+        getWindow().setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        );
+
         webView = new WebView(this);
         setContentView(webView);
 
@@ -33,6 +47,9 @@ public class MainActivity extends Activity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(true);
+        settings.setDatabaseEnabled(true);
+        settings.setAppCacheEnabled(true);
+        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
 
         webView.addJavascriptInterface(new WebAppInterface(), "AndroidLauncher");
         webView.setWebViewClient(new WebViewClient());
@@ -40,8 +57,18 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (webView != null) {
+            webView.evaluateJavascript("if(window.onHomePressed) window.onHomePressed();", null);
+        }
+    }
+
+    @Override
     public void onBackPressed() {
-        // Prevent launcher from exiting on back press
+        if (webView != null) {
+            webView.evaluateJavascript("if(window.onBackPressed) window.onBackPressed();", null);
+        }
     }
 
     public class WebAppInterface {
@@ -89,6 +116,32 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void uninstallApp(String packageName) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_DELETE);
+                intent.setData(Uri.parse("package:" + packageName));
+                startActivity(intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @JavascriptInterface
+        public void setAsDefaultHome() {
+            try {
+                Intent intent = new Intent(android.provider.Settings.ACTION_HOME_SETTINGS);
+                startActivity(intent);
+            } catch (Exception e) {
+                try {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                    startActivity(intent);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        @JavascriptInterface
         public void openSettings() {
             try {
                 Intent intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
@@ -102,7 +155,7 @@ public class MainActivity extends Activity {
         public void openAppDetails(String packageName) {
             try {
                 Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                intent.setData(android.net.Uri.parse("package:" + packageName));
+                intent.setData(Uri.parse("package:" + packageName));
                 startActivity(intent);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -136,16 +189,15 @@ public class MainActivity extends Activity {
         private String getAppIconBase64(PackageManager pm, ResolveInfo ri) {
             try {
                 Drawable icon = ri.loadIcon(pm);
-                int width = icon.getIntrinsicWidth() > 0 ? icon.getIntrinsicWidth() : 96;
-                int height = icon.getIntrinsicHeight() > 0 ? icon.getIntrinsicHeight() : 96;
+                int size = 128; // High DPI 128x128 crisp app icon standard
 
-                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
                 Canvas canvas = new Canvas(bitmap);
                 icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
                 icon.draw(canvas);
 
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 80, outputStream);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 85, outputStream);
                 byte[] byteArray = outputStream.toByteArray();
                 return "data:image/png;base64," + Base64.encodeToString(byteArray, Base64.NO_WRAP);
             } catch (Exception e) {

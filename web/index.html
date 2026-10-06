@@ -12,10 +12,13 @@
   <div class="clock-widget">
     <div class="time-display" id="time-val">12:00</div>
     <div class="date-display" id="date-val">Loading...</div>
-    <div class="device-badge-pill" id="device-badge">⚡ Omarchy OS • Android</div>
+    <div class="badge-row">
+      <div class="device-badge-pill" id="device-badge">⚡ Omarchy OS • Android</div>
+      <button class="set-default-btn" onclick="setDefaultHomeLauncher()">Set Default Launcher</button>
+    </div>
   </div>
 
-  <!-- AI Command & Search Bar -->
+  <!-- AI Command & App Search Bar -->
   <div class="ai-bar-card">
     <div class="ai-icon">⚡</div>
     <input type="text" class="ai-input" id="ai-prompt-input" placeholder="Search apps or run AI prompt..." autocomplete="off">
@@ -23,18 +26,27 @@
   </div>
 
   <!-- Main Scrollable App Container -->
-  <div class="main-content-area">
+  <div class="main-content-area" id="main-scroll-area">
     
-    <!-- Category Filter Pills -->
-    <div class="category-pills">
-      <div class="pill active" data-category="All">All Apps <span class="badge" id="count-all">0</span></div>
-      <div class="pill" data-category="System">System <span class="badge" id="count-system">0</span></div>
-      <div class="pill" data-category="Dev & AI">Dev & AI <span class="badge" id="count-dev">0</span></div>
-      <div class="pill" data-category="User">Installed <span class="badge" id="count-user">0</span></div>
+    <!-- Category & Grid Density Bar -->
+    <div class="controls-row">
+      <div class="category-pills">
+        <div class="pill active" data-category="All">All Apps <span class="badge" id="count-all">0</span></div>
+        <div class="pill" data-category="System">System <span class="badge" id="count-system">0</span></div>
+        <div class="pill" data-category="Dev & AI">Dev & AI <span class="badge" id="count-dev">0</span></div>
+        <div class="pill" data-category="User">Installed <span class="badge" id="count-user">0</span></div>
+      </div>
+
+      <!-- Grid Density Selector -->
+      <div class="grid-density-picker">
+        <button class="density-btn" data-cols="4" onclick="setGridDensity(4)">4x4</button>
+        <button class="density-btn active" data-cols="5" onclick="setGridDensity(5)">5x5</button>
+        <button class="density-btn" data-cols="6" onclick="setGridDensity(6)">6x6</button>
+      </div>
     </div>
 
     <!-- App Grid -->
-    <div class="app-grid" id="app-grid-container">
+    <div class="app-grid grid-cols-5" id="app-grid-container">
       <div class="loading-spinner">Scanning installed apps...</div>
     </div>
 
@@ -55,7 +67,7 @@
         <h3>🎨 Omarchy Theme Engine</h3>
         <button class="close-btn" onclick="closeThemeModal()">✕</button>
       </div>
-      <p class="modal-sub">Choose from 22 curated cyberpunk & dark palettes:</p>
+      <p class="modal-sub">Choose from 7 curated cyberpunk & dark palettes:</p>
       <div class="theme-grid" id="theme-grid-container">
         <!-- Rendered by app.js -->
       </div>
@@ -74,7 +86,8 @@
         <p id="app-modal-pkg" class="app-modal-pkg-name"></p>
         <div class="modal-actions">
           <button class="modal-action-btn primary" id="btn-launch-modal">🚀 Launch App</button>
-          <button class="modal-action-btn secondary" id="btn-info-modal">ℹ️ App Settings</button>
+          <button class="modal-action-btn secondary" id="btn-info-modal">ℹ️ Settings</button>
+          <button class="modal-action-btn danger" id="btn-uninstall-modal">🗑️ Uninstall</button>
         </div>
       </div>
     </div>
