@@ -23,9 +23,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Build Web Assets & Package Web Launcher
         run: |
           mkdir -p android/app/src/main/assets/web
