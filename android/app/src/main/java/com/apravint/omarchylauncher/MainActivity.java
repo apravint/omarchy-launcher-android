@@ -1,4 +1,4 @@
-package com.apravint/omarchylauncher;
+package com.apravint.omarchylauncher;
 
 import android.os.Bundle;
 import android.webkit.WebView;
