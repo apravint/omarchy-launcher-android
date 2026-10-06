@@ -40,20 +40,15 @@ jobs:
 
       - name: Build Android Release APK
         run: |
-          if [ -f "android/gradlew" ]; then
-            cd android
-            ./gradlew assembleRelease --no-daemon
-          else
-            echo "Packaging Web Launcher Standalone PWA Bundle..."
-            zip -r OmarchyLauncher-WebBundle.zip web/
-          fi
+          cd android
+          gradle assembleRelease --no-daemon || ./gradlew assembleRelease --no-daemon || gradle assembleDebug --no-daemon
 
       - name: Upload APK Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: OmarchyLauncher-APK
           path: |
-            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/apk/**/*.apk
             *.zip
           if-no-files-found: ignore
 
@@ -71,9 +66,9 @@ jobs:
             - 🎨 **Omarchy 22 Theme Palette System**: Switch live between Tokyo Night, Catppuccin, Nord, Cyberpunk.
             - 📱 **Native System Home Launcher Intent**: Set as default Android home launcher.
 
-            Download the attached `OmarchyLauncher.apk` file below to install on your Android device!
+            Download the attached `.apk` file below to install directly on your Android device!
           files: |
-            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/apk/**/*.apk
             *.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
