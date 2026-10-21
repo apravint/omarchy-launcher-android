@@ -1,177 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Omarchy Multi-OS Android Launcher</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="omarchy_launcher">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>omarchy_launcher</title>
+  <link rel="manifest" href="manifest.json">
 </head>
-<body class="shape-squircle mode-omarchy theme-tokyonight">
+<body>
+  <!--
+    You can customize the "flutter_bootstrap.js" script.
+    This is useful to provide a custom configuration to the Flutter loader
+    or to give the user feedback during the initialization process.
 
-  <!-- macOS Top Menu Bar (Active in mode-macos) -->
-  <div class="macos-menu-bar" id="macos-bar" style="display:none;">
-    <div class="macos-left">
-      <span class="apple-logo" onclick="openThemeModal()"></span>
-      <span class="app-title">Finder</span>
-      <span class="menu-item">File</span>
-      <span class="menu-item">Edit</span>
-      <span class="menu-item">View</span>
-    </div>
-    <div class="macos-right">
-      <span class="status-item" id="macos-battery">🔋 85%</span>
-      <span class="status-item" id="macos-wifi">📶</span>
-      <span class="status-item" id="macos-clock">12:00</span>
-    </div>
-  </div>
-
-  <!-- Top At-a-Glance Clock & Weather Header (Omarchy & Win11 Mode) -->
-  <div class="clock-widget" id="header-clock">
-    <div class="time-display" id="time-val">12:00</div>
-    <div class="date-display" id="date-val">Loading...</div>
-    <div class="at-a-glance-bar">
-      <span class="weather-pill" id="weather-val">☀️ 26°C • Clear</span>
-      <span class="battery-pill" id="battery-val">🔋 85%</span>
-    </div>
-    <div class="badge-row">
-      <div class="device-badge-pill" id="device-badge">⚡ Omarchy OS • Android</div>
-      <button class="set-default-btn" onclick="setDefaultHomeLauncher()">Set Default Launcher</button>
-    </div>
-  </div>
-
-  <!-- AI Command & App Search Bar -->
-  <div class="ai-bar-card">
-    <div class="ai-icon" id="search-mode-icon">⚡</div>
-    <input type="text" class="ai-input" id="ai-prompt-input" placeholder="Search apps, web, or AI prompt..." autocomplete="off">
-    <button class="clear-btn" id="search-clear" style="display:none;" onclick="clearSearch()">✕</button>
-  </div>
-
-  <!-- Quick Action Search Shortcuts Container -->
-  <div class="search-actions-row" id="search-shortcuts" style="display:none;">
-    <button class="search-action-chip" id="btn-web-search">🔍 Search Web</button>
-    <button class="search-action-chip" id="btn-store-search">🛍️ Play Store</button>
-  </div>
-
-  <!-- Main Launcher Layout Container with Alphabet Fast Scroller -->
-  <div class="launcher-layout-wrapper">
-
-    <!-- Scrollable App Grid Container -->
-    <div class="main-content-area" id="main-scroll-area">
-      
-      <!-- Category & Grid Density Bar -->
-      <div class="controls-row">
-        <div class="category-pills">
-          <div class="pill active" data-category="All">All Apps <span class="badge" id="count-all">0</span></div>
-          <div class="pill" data-category="System">System <span class="badge" id="count-system">0</span></div>
-          <div class="pill" data-category="Dev & AI">Dev & AI <span class="badge" id="count-dev">0</span></div>
-          <div class="pill" data-category="User">Installed <span class="badge" id="count-user">0</span></div>
-        </div>
-
-        <!-- Grid Density Selector -->
-        <div class="grid-density-picker">
-          <button class="density-btn" data-cols="4" onclick="setGridDensity(4)">4x4</button>
-          <button class="density-btn active" data-cols="5" onclick="setGridDensity(5)">5x5</button>
-          <button class="density-btn" data-cols="6" onclick="setGridDensity(6)">6x6</button>
-        </div>
-      </div>
-
-      <!-- App Grid -->
-      <div class="app-grid grid-cols-5" id="app-grid-container">
-        <div class="loading-spinner">Scanning installed apps...</div>
-      </div>
-
-    </div>
-
-    <!-- Niagara-Style Vertical Alphabet Fast-Scroller Index -->
-    <div class="fast-scroll-indexer" id="alphabet-indexer">
-      <!-- Populated by app.js: A-Z index -->
-    </div>
-
-  </div>
-
-  <!-- Favorite Apps Hotseat Pinned Shelf -->
-  <div class="hotseat-dock" id="hotseat-container">
-    <!-- Rendered dynamically by app.js -->
-  </div>
-
-  <!-- Bottom Navigation Dock / Windows 11 Taskbar -->
-  <div class="bottom-bar" id="bottom-dock">
-    <button class="bar-btn active" id="dock-btn-home" title="Home" onclick="scrollToTop()">🏠</button>
-    <button class="bar-btn" id="dock-btn-win11" title="Windows 11 Start Menu" onclick="toggleWin11StartMenu()" style="display:none;">🪟</button>
-    <button class="bar-btn" title="Themes & Customizer" onclick="openThemeModal()">🎨</button>
-    <button class="bar-btn" title="Wallpaper" onclick="openWallpaper()">🖼️</button>
-    <button class="bar-btn" title="Settings" onclick="openSystemSettings()">⚙️</button>
-  </div>
-
-  <!-- Windows 11 Start Menu Modal Overlay -->
-  <div class="modal-overlay" id="win11-modal">
-    <div class="win11-start-card">
-      <div class="win11-search-box">
-        <span>🔍</span>
-        <input type="text" placeholder="Type here to search apps..." oninput="filterWin11Apps(this.value)">
-      </div>
-      <div class="win11-section-title">Pinned Apps</div>
-      <div class="win11-app-grid" id="win11-app-grid">
-        <!-- Rendered by app.js -->
-      </div>
-      <div class="win11-footer">
-        <div class="win11-user">👤 Omarchy User</div>
-        <button class="win11-power-btn" onclick="closeWin11StartMenu()">⏻</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Customization & OS Experience Selector Modal -->
-  <div class="modal-overlay" id="theme-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>🎨 Launcher OS & Theme Engine</h3>
-        <button class="close-btn" onclick="closeThemeModal()">✕</button>
-      </div>
-
-      <!-- OS Experience Launcher Switcher -->
-      <div class="section-label">Launcher Experience Mode</div>
-      <div class="os-mode-row">
-        <button class="os-btn active" data-os="omarchy" onclick="setOSMode('omarchy')">⚡ Omarchy</button>
-        <button class="os-btn" data-os="win11" onclick="setOSMode('win11')">🪟 Windows 11</button>
-        <button class="os-btn" data-os="macos" onclick="setOSMode('macos')"> macOS</button>
-      </div>
-      
-      <!-- Icon Shape Selector -->
-      <div class="section-label">Icon Mask Shapes</div>
-      <div class="shape-selector-row">
-        <button class="shape-btn active" data-shape="squircle" onclick="setIconShape('squircle')">Squircle</button>
-        <button class="shape-btn" data-shape="circle" onclick="setIconShape('circle')">Circle</button>
-        <button class="shape-btn" data-shape="rounded" onclick="setIconShape('rounded')">Square</button>
-        <button class="shape-btn" data-shape="teardrop" onclick="setIconShape('teardrop')">Teardrop</button>
-      </div>
-
-      <div class="section-label">Palettes & Cyberpunk Themes</div>
-      <div class="theme-grid" id="theme-grid-container">
-        <!-- Rendered by app.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- App Info Context Modal -->
-  <div class="modal-overlay" id="app-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="app-modal-title">App Details</h3>
-        <button class="close-btn" onclick="closeAppModal()">✕</button>
-      </div>
-      <div class="app-modal-content">
-        <div id="app-modal-icon" class="app-modal-icon-container"></div>
-        <p id="app-modal-pkg" class="app-modal-pkg-name"></p>
-        <div class="modal-actions">
-          <button class="modal-action-btn primary" id="btn-launch-modal">🚀 Launch App</button>
-          <button class="modal-action-btn secondary" id="btn-pin-hotseat">📌 Pin / Unpin Dock</button>
-          <button class="modal-action-btn secondary" id="btn-info-modal">ℹ️ Settings</button>
-          <button class="modal-action-btn danger" id="btn-uninstall-modal">🗑️ Uninstall</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
+    For more details:
+    * https://docs.flutter.dev/platform-integration/web/initialization
+  -->
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
