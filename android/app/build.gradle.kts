@@ -15,8 +15,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.apravint.omarchy_launcher"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -27,6 +25,28 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    // One flavor per OS-style variant. The applicationId of each flavor matches the
+    // standalone app it replaces, so existing installs upgrade in place.
+    // The flavor name is also what Dart sees via `appFlavor` (lib/core/launcher_mode.dart).
+    flavorDimensions += "variant"
+    productFlavors {
+        create("omarchy") {
+            dimension = "variant"
+            applicationId = "com.apravint.omarchy_launcher"
+            resValue("string", "app_name", "Omarchy Multi-OS")
+        }
+        create("win11") {
+            dimension = "variant"
+            applicationId = "com.apravint.windows_11_launcher"
+            resValue("string", "app_name", "Windows 11")
+        }
+        create("macos") {
+            dimension = "variant"
+            applicationId = "com.apravint.macos_sonoma_launcher"
+            resValue("string", "app_name", "macOS Sonoma")
+        }
     }
 
     buildTypes {

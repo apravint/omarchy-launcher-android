@@ -20,7 +20,9 @@ class OmarchyTheme {
         surface: darkCard,
         onSurface: Colors.white,
       ),
-      textTheme: GoogleFonts.outfitTextTheme(ThemeData(brightness: Brightness.dark).textTheme),
+      textTheme: GoogleFonts.outfitTextTheme(
+        ThemeData(brightness: Brightness.dark).textTheme,
+      ),
     );
   }
 }

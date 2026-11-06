@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'screens/multi_os_screen.dart';
-import 'theme/omarchy_theme.dart';
+
+import 'app.dart';
+import 'core/launcher_controller.dart';
+import 'core/launcher_mode.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,19 +16,9 @@ void main() {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
-  runApp(const OmarchyLauncherApp());
-}
-
-class OmarchyLauncherApp extends StatelessWidget {
-  const OmarchyLauncherApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Omarchy Multi-OS Launcher',
-      debugShowCheckedModeBanner: false,
-      theme: OmarchyTheme.theme(),
-      home: const MultiOsScreen(),
-    );
-  }
+  // `flutter run --flavor win11` etc. sets appFlavor; no flavor means Multi-OS.
+  LauncherController.instance = LauncherController(
+    initial: LauncherMode.fromFlavor(appFlavor),
+  );
+  runApp(const LauncherApp());
 }

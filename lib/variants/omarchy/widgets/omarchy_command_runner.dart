@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/launcher_mode.dart';
-import '../services/launcher_system.dart';
+
+import '../omarchy_state.dart';
 
 class OmarchyCommandRunner extends StatefulWidget {
   const OmarchyCommandRunner({super.key});
@@ -22,7 +22,7 @@ class _OmarchyCommandRunnerState extends State<OmarchyCommandRunner> {
 
   @override
   Widget build(BuildContext context) {
-    final state = LauncherSystemState();
+    final state = OmarchyState();
 
     return ListenableBuilder(
       listenable: state,
@@ -30,7 +30,7 @@ class _OmarchyCommandRunnerState extends State<OmarchyCommandRunner> {
         if (!state.isCommandRunnerOpen) return const SizedBox.shrink();
 
         final query = _searchController.text.trim().toLowerCase();
-        final filteredApps = LauncherSystemState.allApps.where((a) {
+        final filteredApps = OmarchyState.allApps.where((a) {
           if (query.isEmpty) return true;
           return a.name.toLowerCase().contains(query) ||
               a.command.toLowerCase().contains(query) ||
@@ -71,18 +71,30 @@ class _OmarchyCommandRunnerState extends State<OmarchyCommandRunner> {
                           padding: const EdgeInsets.all(14),
                           child: Row(
                             children: [
-                              const Text('>', style: TextStyle(color: Color(0xFF00F0FF), fontSize: 18, fontWeight: FontWeight.bold)),
+                              const Text(
+                                '>',
+                                style: TextStyle(
+                                  color: Color(0xFF00F0FF),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: TextField(
                                   controller: _searchController,
                                   autofocus: true,
-                                  style: GoogleFonts.jetBrainsMono(fontSize: 13, color: Colors.white),
+                                  style: GoogleFonts.jetBrainsMono(
+                                    fontSize: 13,
+                                    color: Colors.white,
+                                  ),
                                   decoration: InputDecoration(
                                     hintText: 'Search applications or type bash command...',
                                     hintStyle: GoogleFonts.jetBrainsMono(
                                       fontSize: 12,
-                                      color: Colors.white.withValues(alpha: 0.35),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.35,
+                                      ),
                                     ),
                                     border: InputBorder.none,
                                     isDense: true,
@@ -92,8 +104,13 @@ class _OmarchyCommandRunnerState extends State<OmarchyCommandRunner> {
                               ),
                               if (_searchController.text.isNotEmpty)
                                 GestureDetector(
-                                  onTap: () => setState(() => _searchController.clear()),
-                                  child: const Icon(Icons.close, size: 16, color: Colors.white54),
+                                  onTap: () =>
+                                      setState(() => _searchController.clear()),
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 16,
+                                    color: Colors.white54,
+                                  ),
                                 ),
                             ],
                           ),
@@ -107,7 +124,10 @@ class _OmarchyCommandRunnerState extends State<OmarchyCommandRunner> {
                             shrinkWrap: true,
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             itemCount: filteredApps.length,
-                            separatorBuilder: (_, _) => const Divider(height: 1, color: Color(0x14FFFFFF)),
+                            separatorBuilder: (_, _) => const Divider(
+                              height: 1,
+                              color: Color(0x14FFFFFF),
+                            ),
                             itemBuilder: (context, i) {
                               final app = filteredApps[i];
                               return _appRow(app, () {
@@ -120,21 +140,32 @@ class _OmarchyCommandRunnerState extends State<OmarchyCommandRunner> {
 
                         // Footer hint
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.3),
-                            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
+                            borderRadius: const BorderRadius.vertical(
+                              bottom: Radius.circular(10),
+                            ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 '${filteredApps.length} entries • [Super + D]',
-                                style: GoogleFonts.jetBrainsMono(fontSize: 10, color: Colors.white.withValues(alpha: 0.4)),
+                                style: GoogleFonts.jetBrainsMono(
+                                  fontSize: 10,
+                                  color: Colors.white.withValues(alpha: 0.4),
+                                ),
                               ),
                               Text(
                                 'IRAM OS Hyprland',
-                                style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF00F0FF)),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 10,
+                                  color: const Color(0xFF00F0FF),
+                                ),
                               ),
                             ],
                           ),
@@ -175,16 +206,27 @@ class _OmarchyCommandRunnerState extends State<OmarchyCommandRunner> {
                 children: [
                   Text(
                     app.name,
-                    style: GoogleFonts.outfit(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white),
+                    style: GoogleFonts.outfit(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                   Text(
                     '${app.command} • ${app.category}',
-                    style: GoogleFonts.jetBrainsMono(fontSize: 10, color: Colors.white.withValues(alpha: 0.5)),
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 10,
+                      color: Colors.white.withValues(alpha: 0.5),
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.white24),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 12,
+              color: Colors.white24,
+            ),
           ],
         ),
       ),
