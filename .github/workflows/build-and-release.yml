@@ -45,14 +45,17 @@ jobs:
       - name: Build Web Bundle
         run: flutter build web --release --base-href "/omarchy-launcher-android/"
 
-      - name: Build Android Release APK
-        run: flutter build apk --release
+      - name: Build Android Release APKs (one per flavor)
+        run: |
+          flutter build apk --release --flavor omarchy
+          flutter build apk --release --flavor win11
+          flutter build apk --release --flavor macos
 
-      - name: Upload APK Artifact
+      - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: omarchy-launcher-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: launcher-release-apks
+          path: build/app/outputs/flutter-apk/app-*-release.apk
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
@@ -60,7 +63,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name || 'v2.1.0' }}
           name: "Omarchy Multi-OS Launcher ${{ github.ref_name || 'v2.1.0' }}"
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: build/app/outputs/flutter-apk/app-*-release.apk
           body: |
             ### 📱 Omarchy Multi-OS Launcher for Android
             Pure Flutter 3.x unified 3-in-1 desktop simulation launcher for Android and Web.
@@ -68,4 +71,5 @@ jobs:
             - **Omarchy Hyprland / IRAM OS Mode**: Top Waybar, dual-tiled windows (Kitty Terminal with neofetch, Neovim editor), and Wofi modal fuzzy runner.
             - **macOS Sonoma Mode**: Top Menu Bar (``, active app, status tray) and floating glassmorphic Dock.
             - **Windows 11 Fluent Mode**: Centered Mica taskbar (`⊞`) and floating Start Menu.
-            - **Instant Mode Switcher**: Seamless 1-tap switching between all 3 desktop operating systems.
+            - **Instant Mode Switcher** (Omarchy Multi-OS build): 1-tap switching between all 3 desktop styles.
+            - Also ships standalone `win11` and `macos` flavor APKs (same app ids as the former single-OS repos).

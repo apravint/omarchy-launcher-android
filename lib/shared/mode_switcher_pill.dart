@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/launcher_mode.dart';
-import '../services/launcher_system.dart';
+
+import '../core/launcher_controller.dart';
+import '../core/launcher_mode.dart';
 
 class ModeSwitcherPill extends StatelessWidget {
-  const ModeSwitcherPill({super.key});
+  const ModeSwitcherPill({super.key, required this.controller});
+
+  final LauncherController controller;
 
   @override
   Widget build(BuildContext context) {
-    final state = LauncherSystemState();
+    final state = controller;
 
     return ListenableBuilder(
       listenable: state,
@@ -34,16 +37,19 @@ class ModeSwitcherPill extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: LauncherMode.values.map((mode) {
-              final isSelected = state.currentMode == mode;
+              final isSelected = state.mode == mode;
 
               return GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  state.setMode(mode);
+                  state.select(mode);
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? mode.accentColor.withValues(alpha: 0.22)
@@ -59,15 +65,21 @@ class ModeSwitcherPill extends StatelessWidget {
                       Icon(
                         mode.icon,
                         size: 14,
-                        color: isSelected ? mode.accentColor : Colors.white.withValues(alpha: 0.6),
+                        color: isSelected
+                            ? mode.accentColor
+                            : Colors.white.withValues(alpha: 0.6),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         mode.label,
                         style: GoogleFonts.outfit(
                           fontSize: 11,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.65),
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          color: isSelected
+                              ? Colors.white
+                              : Colors.white.withValues(alpha: 0.65),
                         ),
                       ),
                     ],

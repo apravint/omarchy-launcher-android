@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
-import '../models/launcher_mode.dart';
 
-class LauncherSystemState extends ChangeNotifier {
-  static final LauncherSystemState _instance = LauncherSystemState._internal();
-  factory LauncherSystemState() => _instance;
+class LauncherAppItem {
+  final String id;
+  final String name;
+  final String category;
+  final IconData iconData;
+  final Color iconColor;
+  final String command;
 
-  LauncherSystemState._internal();
+  const LauncherAppItem({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.iconData,
+    required this.iconColor,
+    required this.command,
+  });
+}
 
-  LauncherMode _currentMode = LauncherMode.omarchy;
-  LauncherMode get currentMode => _currentMode;
+class OmarchyState extends ChangeNotifier {
+  static final OmarchyState _instance = OmarchyState._internal();
+  factory OmarchyState() => _instance;
+
+  OmarchyState._internal();
 
   int _activeWorkspace = 1;
   int get activeWorkspace => _activeWorkspace;
@@ -109,14 +123,6 @@ class LauncherSystemState extends ChangeNotifier {
       command: 'hypr-theme-studio',
     ),
   ];
-
-  void setMode(LauncherMode mode) {
-    _currentMode = mode;
-    _isCommandRunnerOpen = false;
-    _isStartMenuOpen = false;
-    _isLaunchpadOpen = false;
-    notifyListeners();
-  }
 
   void setWorkspace(int index) {
     _activeWorkspace = index;

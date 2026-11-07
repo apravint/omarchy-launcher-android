@@ -39,13 +39,44 @@ Experience the 3-in-1 launcher directly in your web browser:
 
 ---
 
+## 🧩 Flavors (one codebase, three launchers)
+
+This repo is the single home for the OS-style launchers that used to live in separate, near-identical repositories. Each variant is an Android **product flavor**; the flavor name is read at runtime through Flutter's `appFlavor` and selects the variant (`lib/core/launcher_mode.dart`). Application ids are unchanged, so existing installs upgrade in place.
+
+| Flavor | Application id | Launcher label | Behavior | Replaces repo(s) |
+|---|---|---|---|---|
+| `omarchy` | `com.apravint.omarchy_launcher` | Omarchy Multi-OS | Omarchy Hyprland desktop plus the 1-tap switcher pill to the other two styles | `omarchy-launcher-android` (this repo) |
+| `win11` | `com.apravint.windows_11_launcher` | Windows 11 | Windows 11 Fluent desktop only (taskbar, Start menu, action center, File Explorer) | `omarchy-launcher-win11`, `windows-11-launcher-android` (identical copies) |
+| `macos` | `com.apravint.macos_sonoma_launcher` | macOS Sonoma | macOS Sonoma desktop only (menu bar, dock, Launchpad, Control Center, About This Mac) | `omarchy-launcher-macos`, `macos-sonoma-launcher-android` (identical copies) |
+
+Running without `--flavor` (web, desktop, `flutter test`) behaves like the `omarchy` flavor.
+
+### Project layout
+
+```
+lib/
+  main.dart                 entry point; maps appFlavor -> LauncherMode
+  app.dart                  LauncherApp: picks theme + desktop for the active mode
+  core/                     LauncherMode (flavor table), LauncherController (active mode, switching)
+  shared/                   ModeSwitcherPill (only shown in the omarchy flavor)
+  variants/
+    omarchy/                Waybar, tiling desktop, Wofi runner, theme, state
+    win11/                  models, services, theme, screens, widgets
+    macos/                  models, services, theme, screens, widgets
+test/                       unit tests (mode/flavor mapping, controller, per-variant state) and widget tests
+```
+
+Each variant keeps its own state class (`OmarchyState`, `WinSystemState`, `MacSystemState`), theme, and widgets; only the mode/flavor plumbing is shared.
+
+---
+
 ## 🛠️ Tech Stack & Dependencies
 
 - **Framework**: Flutter 3.47.7 (Dart 3.13.5)
-- **Design System**: Impeccable Design System with Cyberpunk Cyan, macOS Glass, and Windows Fluent Mica themes
+- **Design System**: Cyberpunk Cyan (Omarchy), macOS Glass, and Windows Fluent Mica themes
 - **Typography**: Google Fonts (`Outfit` & `JetBrains Mono`)
 - **Formatting**: `intl: ^0.20.0`
-- **Testing**: 100% pass rate on widget smoke test suite
+- **Testing**: unit tests for flavor mapping, the mode controller, and each variant's state, plus widget tests for every flavor's desktop and the mode switcher
 
 ---
 
@@ -60,21 +91,26 @@ Experience the 3-in-1 launcher directly in your web browser:
 git clone https://github.com/apravint/omarchy-launcher-android.git
 cd omarchy-launcher-android
 
-# Fetch dependencies
 flutter pub get
-
-# Run tests
+flutter analyze
 flutter test
 
-# Run on connected Android device or desktop
-flutter run
+# Run a flavor on a connected Android device
+flutter run --flavor omarchy
+flutter run --flavor win11
+flutter run --flavor macos
 
-# Build release APK
-flutter build apk --release
+# Build release APKs (one per flavor)
+flutter build apk --release --flavor omarchy
+flutter build apk --release --flavor win11
+flutter build apk --release --flavor macos
 
-# Build for Web
+# Web / desktop (no flavor, Omarchy Multi-OS behavior)
+flutter run -d chrome
 flutter build web --release --base-href "/omarchy-launcher-android/"
 ```
+
+CI (`.github/workflows/build-and-release.yml`) runs analyze and tests, then builds all three flavor APKs.
 
 ---
 
